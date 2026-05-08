@@ -1,3 +1,39 @@
+# Grimm-Comfy
+
+Personal fork of [Comfy-Org/ComfyUI](https://github.com/Comfy-Org/ComfyUI) maintained by [@Deaththegrim](https://github.com/Deaththegrim). Carries fork-only patches that have not yet been merged upstream, plus local tooling for AMD RDNA 4 (RX 9070 XT) operators.
+
+**See [CHANGELOG.md](CHANGELOG.md) for the full list of fork-specific changes.**
+
+## What's in this fork
+
+- **30 open upstream PRs** against `Comfy-Org/ComfyUI` (all from this fork): perf caches (CLIP encode / LoRA / VAE / ControlNet / Upscale loaders), async D2H copies on VAE encode + decode, parallel PNG encode, score-based cache eviction, pause/resume queue, basic auth, friendlier node + checkpoint errors, 4 reproducibility / off-by-one / sentinel bug fixes, and 8 new or improved API endpoints. Full list in the changelog.
+- **Local tooling** in `comfy/` — updated `launch.sh` with the new cache-cap env vars, a `restart-comfy.sh` recovery script, and `comfy-cli.sh` for the new `/queue/pause`, `/free_memory`, `/interrupt` endpoints.
+
+## Branch layout
+
+| Branch | Purpose |
+|---|---|
+| `master` | Tracks upstream `Comfy-Org/ComfyUI` master. |
+| `grimm-all` | Integration branch — every fork patch merged on top of `master` (~80 commits ahead). Sync-tested clean. |
+| `clip-encode-cache`, `saveimage-parallel-encode`, … | One branch per upstream PR. Kept so they can be fast-forwarded as PRs land. |
+
+To run the integrated build:
+
+```bash
+git clone https://github.com/Deaththegrim/Grimm-Comfy.git
+cd Grimm-Comfy
+git checkout grimm-all
+# follow the upstream install instructions below
+```
+
+## Contributing
+
+Fork-specific work happens here. For changes you'd like to see in upstream ComfyUI, send PRs to [Comfy-Org/ComfyUI](https://github.com/Comfy-Org/ComfyUI) directly.
+
+---
+
+# Upstream README
+
 <div align="center">
 
 # ComfyUI
