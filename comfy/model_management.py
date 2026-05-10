@@ -551,18 +551,28 @@ class LoadedModel:
         return self._model()
 
     def model_memory(self):
+        if self.model is None:
+            return 0
         return self.model.model_size()
 
     def model_mmap_residency(self, free=False):
+        if self.model is None:
+            return (0, 0)
         return self.model.model_mmap_residency(free=free)
 
     def model_loaded_memory(self):
+        if self.model is None:
+            return 0
         return self.model.loaded_size()
 
     def model_offloaded_memory(self):
+        if self.model is None:
+            return 0
         return self.model.model_size() - self.model.loaded_size()
 
     def model_memory_required(self, device):
+        if self.model is None:
+            return 0
         if device == self.model.current_loaded_device():
             return self.model_offloaded_memory()
         else:
@@ -614,6 +624,11 @@ class LoadedModel:
             self._patcher_finalizer.detach()
 
     def is_dead(self):
+        # real_model is None before model_load() runs and after detach() —
+        # in both states the entry isn't a zombie, just unloaded. Only
+        # call the weakref when it actually exists.
+        if self.real_model is None:
+            return False
         return self.real_model() is not None and self.model is None
 
 
@@ -865,7 +880,11 @@ def archive_model_dtypes(model):
 def cleanup_models():
     to_delete = []
     for i in range(len(current_loaded_models)):
-        if current_loaded_models[i].real_model() is None:
+        # real_model can be a plain None (never loaded / detached) or a
+        # weakref that derefs to None (referent was GC'd). Both states
+        # mean "no live model here" and the entry should be pruned.
+        rm = current_loaded_models[i].real_model
+        if rm is None or rm() is None:
             to_delete = [i] + to_delete
 
     for i in to_delete:
